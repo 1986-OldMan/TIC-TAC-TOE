@@ -1,74 +1,86 @@
-document.querySelectorAll('.square').forEach(square => square.addEventListener('click', insertXOrY, { once: true }));
+const cells = document.querySelectorAll(".cell");
+const statusText = document.querySelector("#statusText");
+const restartBtn = document.querySelector("#restartBtn");
+const winConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+];
 
-let xOrY = 'X';
+let options = ["", "", "", "", "", "", "", "", ""];
+let currentPlayer = "X";
+let running = false;
 
-function insertXOrY(index) {
+initializeGame();
 
-    let elementClicked = index.target;
-    id = elementClicked.getAttribute('id');
+function initializeGame() {
+    cells.forEach(cell => cell.addEventListener("click", cellClicked));
+    restartBtn.addEventListener("click", restartGame);
+    statusText.textContent = `${currentPlayer}'s turn`;
+    running = true;
+};
 
-    console.log(id);
+function cellClicked() {
+    const cellIndex = this.getAttribute("cellIndex");
 
-    elementClicked.innerHTML = xOrY;
-    checkWinner()
-
-    if (xOrY == 'X') {
-        xOrY = 'O';
-    } else {
-        xOrY = 'X';
+    if(options[cellIndex] != "" || !running){
+        return;
     }
 
-    let gameInfo = document.querySelector('.player-turn');
+    updateCell(this, cellIndex);
+    checkWinner();
+};
 
-    gameInfo.innerHTML = xOrY;
+function updateCell(cell, index) {
+    options[index] = currentPlayer;
+    cell.textContent = currentPlayer;
+};
 
-}
-
+function changePlayer() {
+    currentPlayer = (currentPlayer == "X") ? "O" : "X";
+    statusText.textContent = `${currentPlayer}'s turn`;
+};
 
 function checkWinner() {
+    let roundWon = false;
 
+    for(let i = 0; i < winConditions.length; i++) {
+        const condition = winConditions[i];
+        const cellA = options[condition[0]];
+        const cellB = options[condition[1]];
+        const cellC = options[condition[2]];
 
-    let squareOne = document.getElementById('s1').innerHTML;
-    let squareTwo = document.getElementById('s2').innerHTML;
-    let squareThree = document.getElementById('s3').innerHTML;
-    let squareFour = document.getElementById('s4').innerHTML;
-    let squareFive = document.getElementById('s5').innerHTML;
-    let squareSix = document.getElementById('s6').innerHTML;
-    let squareSeven = document.getElementById('s7').innerHTML;
-    let squareEight = document.getElementById('s8').innerHTML;
-    let squareNine = document.getElementById('s9').innerHTML;
-
-
-
-    if ((squareOne == 'X') && (squareTwo == 'X') && (squareThree == 'X') || (squareOne == 'O') && (squareTwo == 'O') && (squareThree == 'O')) {
-        alert('winner ' + xOrY);
+        if(cellA == "" || cellB == "" || cellC == "") {
+            continue;
+        }
+        if(cellA == cellB && cellB == cellC) {
+            roundWon = true;
+            break;
+        }
     }
 
-    if ((squareFour == 'X') && (squareFive == 'X') && (squareSix == 'X') || (squareFour == 'O') && (squareFive == 'O') && (squareSix == 'O')) {
-        alert('winner ' + xOrY);
+    if(roundWon){
+        statusText.textContent = `${currentPlayer} wins!`;
+        running = false;
     }
+    else if(!options.includes("")){
+        statusText.textContent = `Draw!`;
+        running = false;
+    }
+    else{
+        changePlayer();
+    }
+};
 
-    if ((squareSeven == 'X') && (squareEight == 'X') && (squareNine == 'X') || (squareSeven == 'O') && (squareEight == 'O') && (squareNine == 'O')) {
-        alert('winner ' + xOrY);
-    }
-
-    if ((squareOne == 'X') && (squareFour == 'X') && (squareSeven == 'X') || (squareOne == 'O') && (squareFour == 'O') && (squareSeven == 'O')) {
-        alert('winner ' + xOrY);
-    }
-
-    if ((squareTwo == 'X') && (squareFive == 'X') && (squareEight == 'X') || (squareTwo == 'O') && (squareFive == 'O') && (squareEight == 'O')) {
-        alert('winner ' + xOrY);
-    }
-
-    if ((squareThree == 'X') && (squareSix == 'X') && (squareNine == 'X') || (squareThree == 'O') && (squareSix == 'O') && (squareNine == 'O')) {
-        alert('winner ' + xOrY);
-    }
-
-    if ((squareOne == 'X') && (squareFive == 'X') && (squareNine == 'X') || (squareOne == 'O') && (squareFive == 'O') && (squareNine == 'O')) {
-        alert('winner ' + xOrY);
-    }
-    if ((squareThree == 'X') && (squareFive == 'X') && (squareSeven == 'X') || (squareThree == 'O') && (squareFive == 'O') && (squareSeven == 'O')) {
-        alert('winner ' + xOrY);
-    }
-
-}
+function restartGame() {
+    currentPlayer = "X";
+    options = ["", "", "", "", "", "", "", "", ""];
+    statusText.textContent = `${currentPlayer}'s turn`;
+    cells.forEach(cell => cell.textContent = "");
+    running = true;
+};
